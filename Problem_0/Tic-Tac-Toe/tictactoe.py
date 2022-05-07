@@ -4,6 +4,7 @@ Tic Tac Toe Player
 
 import copy
 import math
+import random
 
 X = "X"
 O = "O"
@@ -66,6 +67,8 @@ def result(board, action):
     currentPlayer = player(board)
     boardClone = copy.deepcopy(board)
 
+    print(action)
+
     # check if the range action is within 0 to 2, raise ValueError if not
     for selectedIndex in action:
         if selectedIndex > 2 or selectedIndex < 0:
@@ -75,8 +78,9 @@ def result(board, action):
     if boardClone[action[0]][action[1]] != EMPTY:
         raise Exception("Cell already occupied")
 
-    # make the move
-    boardClone[action[0]][action[1]] = currentPlayer
+    # Set the cell to the current player
+    else:
+        boardClone[action[0]][action[1]] = currentPlayer
 
     return boardClone
 
@@ -85,25 +89,74 @@ def winner(board):
     """
     Returns the winner of the game, if there is one.
     """
-    raise NotImplementedError
+    for i in range(0, len(board) - 1):
+        # check rows from top to bottom
+        if (board[i][0] == board[i][1] == board[i][2] != EMPTY) and (board[i][0] != EMPTY):
+            return board[i][0]
+
+        # check columns from left to right
+        if (board[0][i] == board[1][i] == board[2][i] != EMPTY) and (board[0][i] != EMPTY):
+            return board[0][i]
+
+    # check diagonals
+    # Top left to bottom right
+    if (board[0][0] == board[1][1] == board[2][2] != EMPTY) and (board[0][0] != EMPTY):
+        return board[0][0]
+    # Top right to bottom left
+    if (board[0][2] == board[1][1] == board[2][0] != EMPTY) and (board[0][2] != EMPTY):
+        return board[0][2]
+
+    return None
 
 
 def terminal(board):
     """
     Returns True if game is over, False otherwise.
     """
-    raise NotImplementedError
+    roundResult = winner(board)
+
+    # if there is a winner (I.E: GG), return True
+    if roundResult is not None:
+        return True
+
+    # check is there is still empty cell unfilled
+    for iIndex, i in enumerate(board):
+        for jIndex, j in enumerate(i):
+            # Some cells are empty, game is still on the way
+            if j == EMPTY:
+                return False
+
+    return True
 
 
 def utility(board):
     """
     Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
     """
-    raise NotImplementedError
+    winPlayer = winner(board)
+
+    if winPlayer == X:
+        return 1
+    elif winPlayer == O:
+        return -1
+    else:
+        return 0
 
 
 def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
-    raise NotImplementedError
+
+    # just some random "AI" code to check is all method before minimax is working
+    action = (random.randint(0, 2), random.randint(0, 2))
+    actionHistory = set()
+
+    print("Random action: ", action)
+
+    if action not in actionHistory:
+        actionHistory.add(action)
+        print("ActionHistory: ", actionHistory)
+        return action
+
+    return None
