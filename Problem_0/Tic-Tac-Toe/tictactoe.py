@@ -48,7 +48,14 @@ def actions(board):
     """
     Returns set of all possible actions (i, j) available on the board.
     """
-    raise NotImplementedError
+    possibleActions = set()
+
+    for iIndex, i in enumerate(board):  # row
+        for jIndex, j in enumerate(i):  # column
+            if j == EMPTY:              # Add the index of the empty cell to the set
+                possibleActions.add((iIndex, jIndex))
+
+    return possibleActions
 
 
 def result(board, action):
