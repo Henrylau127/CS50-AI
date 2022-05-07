@@ -2,6 +2,7 @@
 Tic Tac Toe Player
 """
 
+import copy
 import math
 
 X = "X"
@@ -62,7 +63,22 @@ def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
-    raise NotImplementedError
+    currentPlayer = player(board)
+    boardClone = copy.deepcopy(board)
+
+    # check if the range action is within 0 to 2, raise ValueError if not
+    for selectedIndex in action:
+        if selectedIndex > 2 or selectedIndex < 0:
+            raise ValueError("Invalid action")
+
+    # raise ValueError if the cell is not empty
+    if boardClone[action[0]][action[1]] != EMPTY:
+        raise Exception("Cell already occupied")
+
+    # make the move
+    boardClone[action[0]][action[1]] = currentPlayer
+
+    return boardClone
 
 
 def winner(board):
