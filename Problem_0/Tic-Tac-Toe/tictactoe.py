@@ -22,7 +22,26 @@ def player(board):
     """
     Returns player who has the next turn on a board.
     """
-    raise NotImplementedError
+    XStepCount = OStepCount = EmptyCount = 0
+
+    # count the number of X, O and EMPTY on the board
+    for i in board:
+        for j in i:
+            if j == X:                    # Cell is X
+                XStepCount += 1
+            elif j == O:                  # Cell is O
+                OStepCount += 1
+            elif j == EMPTY:              # Cell is EMPTY/None
+                EmptyCount += 1
+
+    # if there is an empty space, return the player who has the next turn
+    if EmptyCount > 0:
+        if XStepCount > OStepCount:       # it's O's turn if Player X has more steps than Player O
+            return O
+        elif XStepCount < OStepCount:     # it's X's turn if Player X has fewer steps than Player O
+            return X
+        else:                             # Default starting player is X
+            return X
 
 
 def actions(board):
