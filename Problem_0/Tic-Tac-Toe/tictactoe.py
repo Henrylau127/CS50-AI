@@ -67,8 +67,6 @@ def result(board, action):
     currentPlayer = player(board)
     boardClone = copy.deepcopy(board)
 
-    print(action)
-
     # check if the range action is within 0 to 2, raise ValueError if not
     for selectedIndex in action:
         if selectedIndex > 2 or selectedIndex < 0:
@@ -146,17 +144,83 @@ def utility(board):
 def minimax(board):
     """
     Returns the optimal action for the current player on the board.
+    The minimax algorithm, max_value and min_value are based on the pseudocode in the lecture 0.
     """
+    # NTS: Player X = As low as possible, Player O = As high as possible
+    currentPlayer = player(board)
+    optimalAction = []
 
-    # just some random "AI" code to check is all method before minimax is working
-    action = (random.randint(0, 2), random.randint(0, 2))
-    actionHistory = set()
+    # first round, return a random action as any cell is an acceptable solution
+    if board == initial_state():
+        optimalAction = (random.randint(0, 2), random.randint(0, 2))
+        return optimalAction
 
-    print("Random action: ", action)
+    # game over
+    if terminal(board):
+        return None
 
-    if action not in actionHistory:
-        actionHistory.add(action)
-        print("ActionHistory: ", actionHistory)
-        return action
+    # game is not over yet
+    else:
+        # player X's turn
+        if currentPlayer == X:
+            possibleActions = actions(board)
+            bestValue = -math.inf
 
-    return None
+            for action in possibleActions:
+                # get the value of the action
+                value = min_value(result(board, action))
+                # check if the value is better than the current best value
+                if value > bestValue:
+                    bestValue = value
+                    optimalAction = action
+
+            return optimalAction
+
+        # player O's turn
+        else:
+            possibleActions = actions(board)
+            bestValue = math.inf
+
+            for action in possibleActions:
+                # get the value of the action
+                value = max_value(result(board, action))
+                # check if the value is better than the current best value
+                if value < bestValue:
+                    bestValue = value
+                    optimalAction = action
+
+            return optimalAction
+
+
+def max_value(board):
+    """
+    Returns the maximum possible value of the current board
+    """
+    value = -math.inf
+
+    # game is over
+    if terminal(board):
+        return utility(board)
+
+    # game is not over yet, find the best possible move for player X
+    else:
+        for action in actions(board):
+            value = max(value, min_value(result(board, action)))
+        return value
+
+
+def min_value(board):
+    """
+    Returns the minimum possible value of the current board
+    """
+    value = math.inf
+
+    # game is over
+    if terminal(board):
+        return utility(board)
+
+    # game is not over yet, find the best possible move for player O
+    else:
+        for action in actions(board):
+            value = min(value, max_value(result(board, action)))
+        return value
