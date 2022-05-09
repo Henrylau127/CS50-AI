@@ -26,7 +26,11 @@ def player(board):
     """
     XStepCount = OStepCount = EmptyCount = 0
 
-    # count the number of X, O and EMPTY on the board
+    # game is over
+    if terminal(board):
+        return None
+
+    # count the total number of X, O and EMPTY on the board
     for i in board:
         for j in i:
             if j == X:                    # Cell is X
@@ -52,6 +56,11 @@ def actions(board):
     """
     possibleActions = set()
 
+    # game is over
+    if terminal(board):
+        return None
+
+    # game is not over, add all possible actions to the set
     for iIndex, i in enumerate(board):  # row
         for jIndex, j in enumerate(i):  # column
             if j == EMPTY:              # Add the index of the empty cell to the set
@@ -87,21 +96,21 @@ def winner(board):
     """
     Returns the winner of the game, if there is one.
     """
-    for i in range(0, len(board) - 1):
+    for i in range(0, len(board)):
         # check rows from top to bottom
-        if (board[i][0] == board[i][1] == board[i][2] != EMPTY) and (board[i][0] != EMPTY):
+        if (board[i][0] == board[i][1] == board[i][2]) and (board[i][0] != EMPTY):
             return board[i][0]
 
         # check columns from left to right
-        if (board[0][i] == board[1][i] == board[2][i] != EMPTY) and (board[0][i] != EMPTY):
+        if (board[0][i] == board[1][i] == board[2][i]) and (board[0][i] != EMPTY):
             return board[0][i]
 
     # check diagonals
     # Top left to bottom right
-    if (board[0][0] == board[1][1] == board[2][2] != EMPTY) and (board[0][0] != EMPTY):
+    if (board[0][0] == board[1][1] == board[2][2]) and (board[0][0] != EMPTY):
         return board[0][0]
     # Top right to bottom left
-    if (board[0][2] == board[1][1] == board[2][0] != EMPTY) and (board[0][2] != EMPTY):
+    if (board[0][2] == board[1][1] == board[2][0]) and (board[0][2] != EMPTY):
         return board[0][2]
 
     return None
@@ -113,13 +122,13 @@ def terminal(board):
     """
     roundResult = winner(board)
 
-    # if there is a winner (I.E: GG), return True
+    # if there is a winner, return True
     if roundResult is not None:
         return True
 
     # check is there is still empty cell unfilled
-    for iIndex, i in enumerate(board):
-        for jIndex, j in enumerate(i):
+    for i in board:
+        for j in i:
             # Some cells are empty, game is still on the way
             if j == EMPTY:
                 return False
@@ -146,11 +155,12 @@ def minimax(board):
     Returns the optimal action for the current player on the board.
     The minimax algorithm, max_value and min_value are based on the pseudocode in the lecture 0.
     """
-    # NTS: Player X = As low as possible, Player O = As high as possible
     currentPlayer = player(board)
     optimalAction = []
 
-    # first round, return a random action as any cell is an acceptable solution
+    # First round, return a random action as any cell is an acceptable solution
+    # If not, the "AI" could stick in an infinite loop as it's unable to find the best solution based on the empty board
+    # Therefore, this is the only way to get the game started when the starting player is the "AI"
     if board == initial_state():
         optimalAction = (random.randint(0, 2), random.randint(0, 2))
         return optimalAction
@@ -164,14 +174,14 @@ def minimax(board):
         # player X's turn
         if currentPlayer == X:
             possibleActions = actions(board)
-            bestValue = -math.inf
+            currentBestValue = -math.inf
 
             for action in possibleActions:
-                # get the value of the action
+                # get the value of the action, and what the outcome could be
                 value = min_value(result(board, action))
                 # check if the value is better than the current best value
-                if value > bestValue:
-                    bestValue = value
+                if value > currentBestValue:
+                    currentBestValue = value
                     optimalAction = action
 
             return optimalAction
@@ -179,14 +189,14 @@ def minimax(board):
         # player O's turn
         else:
             possibleActions = actions(board)
-            bestValue = math.inf
+            currentBestValue = math.inf
 
             for action in possibleActions:
-                # get the value of the action
+                # get the value of the action, and what the outcome could be
                 value = max_value(result(board, action))
                 # check if the value is better than the current best value
-                if value < bestValue:
-                    bestValue = value
+                if value < currentBestValue:
+                    currentBestValue = value
                     optimalAction = action
 
             return optimalAction
