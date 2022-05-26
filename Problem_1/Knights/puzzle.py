@@ -9,27 +9,21 @@ BKnave = Symbol("B is a Knave")
 CKnight = Symbol("C is a Knight")
 CKnave = Symbol("C is a Knave")
 
-# Knave always lies = false
-# Knight always speaks the truth = true
-
 # Puzzle 0
 # A says "I am both a knight and a knave."
-# Expected: A is a Knave
 knowledge0 = And(
     # Conditions given by the puzzle
     Or(AKnight, AKnave),
     Not(And(AKnight, AKnave)),
 
     # A cannot be both a knight and a knave at the same time
-    # Therefore, he is lying and therefore a knave
+    # Thus, he is lying and therefore a knave
     Implication(AKnight, AKnave)
 )
 
 # Puzzle 1
 # A says "We are both knaves."
 # B says nothing.
-# Expected: A is a Knave
-#           B is a Knight
 knowledge1 = And(
     # Conditions given by the puzzle
     Or(AKnight, AKnave),
@@ -37,22 +31,27 @@ knowledge1 = And(
     Not(And(AKnight, AKnave)),
     Not(And(BKnight, BKnave)),
 
-    # A claims both of them are knaves,
-    # but he is clearly lying as B did not confirm or deny anything
+    # As B did not confirm or deny anything
+    # Therefore A's claim of they are both knaves is clearly a lie
     Biconditional(AKnight, And(AKnave, BKnave))
 )
 
 # Puzzle 2
 # A says "We are the same kind."
 # B says "We are of different kinds."
-# Expected: A is a Knave
-#           B is a Knight
 knowledge2 = And(
     # Conditions given by the puzzle
     Or(AKnight, AKnave),
     Or(BKnight, BKnave),
     Not(And(AKnight, AKnave)),
     Not(And(BKnight, BKnave)),
+
+    # Check B's claim , where he claims that he IS NOT the same kind as A
+    # Which appeared to be the truth as the rule stated that the knight would not lie
+    Biconditional(BKnight, Or(And(AKnight, BKnave), And(AKnave, BKnight))),
+    # Check A's claim, where he claims that he IS the same kind as B
+    # Which appeared to be a lie, as B denied his claim, thus indicating that A is a knave
+    Biconditional(AKnight, Or(And(AKnight, BKnight), And(AKnave, BKnave)))
 )
 
 # Puzzle 3
@@ -60,9 +59,6 @@ knowledge2 = And(
 # B says "A said 'I am a knave'."
 # B says "C is a knave."
 # C says "A is a knight."
-# Expected: A is a knight
-#           B is a knave
-#           C is a knight
 knowledge3 = And(
     # Conditions given by the puzzle
     Or(AKnight, AKnave),
@@ -71,6 +67,13 @@ knowledge3 = And(
     Not(And(AKnight, AKnave)),
     Not(And(BKnight, BKnave)),
     Not(And(CKnight, CKnave)),
+
+    # If C is speaking the truth, then C and A are both Knight
+    Biconditional(CKnight, AKnight),
+    # If B is speaking the truth, then B is Knight and C is Knave
+    Biconditional(BKnight, CKnave),
+    # We do not know what A said exactly, but if C is knight, then his claim on A is a Knight is true
+    And(AKnight, Or(AKnight, AKnave), CKnight)
 )
 
 
