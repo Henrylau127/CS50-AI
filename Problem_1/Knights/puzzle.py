@@ -70,8 +70,8 @@ knowledge3 = And(
 
     # If C is speaking the truth, then C and A are both Knight
     Biconditional(CKnight, AKnight),
-    # If B is speaking the truth, then B is Knight and C is Knave
-    Biconditional(BKnight, CKnave),
+    # If B is speaking the truth, then B is Knight and both C and A are Knave
+    Biconditional(BKnight, And(CKnave, AKnave)),
     # We do not know what A said exactly, but if C is knight, then his claim on A is a Knight is true
     And(AKnight, Or(AKnight, AKnave), CKnight)
 )
