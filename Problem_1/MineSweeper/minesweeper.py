@@ -107,11 +107,7 @@ class Sentence():
         """
         # one/more mines nearby
         if len(self.cells) == self.count:
-            print("self.cells type = ", type(self.cells))
             return self.cells
-        # no mines nearby, return an empty set
-        else:
-            return set()
 
     def known_safes(self):
         """
@@ -120,9 +116,6 @@ class Sentence():
         # no mine nearby
         if self.count == 0:
             return self.cells
-        # there are mines nearby, return an empty set
-        else:
-            return set()
 
     def mark_mine(self, cell):
         """
@@ -139,10 +132,9 @@ class Sentence():
         Updates internal knowledge representation given the fact that
         a cell is known to be safe.
         """
-        # if the cell is in the sentence, remove it and reduce count
+        # if the cell is in the sentence, remove it
         if cell in self.cells:
             self.cells.remove(cell)
-            self.count -= 1
 
 
 class MinesweeperAI():
@@ -193,18 +185,24 @@ class MinesweeperAI():
             1) mark the cell as a move that has been made : Done
             2) mark the cell as safe                      : Done
             3) add a new sentence to the AI's knowledge base
-               based on the value of `cell` and `count`
+               based on the value of `cell` and `count`             format: cell - {0,1}, count - 1
             4) mark any additional cells as safe or as mines
                if it can be concluded based on the AI's knowledge base
             5) add any new sentences to the AI's knowledge base
                if they can be inferred from existing knowledge
         """
-        self.moves_made.add(cell)  # Mark the cell as a made move
-        self.safes.add(cell)  # Mark the cell as safe
+        self.moves_made.add(cell)         # Mark the cell as a made move
+        self.mark_safe(cell)              # Mark the cell as safe
 
         sentence = Sentence(cell, count)  # Create a new sentence
 
-        print("Sentence = ", sentence)
+
+
+        print("\n-------------------")
+        print("cell length = ", len(sentence.cells))
+        print("cells = ", sentence.cells)
+        print("count = ", count)
+        print("-------------------")
 
     def make_safe_move(self):
         """
@@ -217,8 +215,8 @@ class MinesweeperAI():
         """
         # Loop through all known safe moves
         for move in self.safes:
-            # return the move if it isn't been take before
-            if move not in self.moves_made:
+            # return the move if it isn't been take before and isn't known to be mine
+            if move not in self.moves_made and move not in self.mines:
                 return move
 
         # No safe move can be guaranteed, return None
@@ -237,7 +235,7 @@ class MinesweeperAI():
         if randomMove in self.moves_made or randomMove in self.mines:
             # Regenerate the move if it's already been chosen or known to be mines
             self.make_random_move()
-        elif randomMove not in self.moves_made or randomMove not in self.mines:
+        elif randomMove not in self.moves_made and randomMove not in self.mines:
             # return the move if it's available
             return randomMove
 
