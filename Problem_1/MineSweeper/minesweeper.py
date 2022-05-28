@@ -106,7 +106,7 @@ class Sentence():
         Returns the set of all cells in self.cells known to be mines.
         """
         # one/more mines nearby
-        if len(self.cells) == self.count:
+        if len(self.cells) == self.count and self.count > 0:
             return self.cells
 
     def known_safes(self):
@@ -194,15 +194,42 @@ class MinesweeperAI():
         self.moves_made.add(cell)         # Mark the cell as a made move
         self.mark_safe(cell)              # Mark the cell as safe
 
-        sentence = Sentence(cell, count)  # Create a new sentence
+        sentence = Sentence(cell, count)  # Create a new sentence, for debugging only
+        nearbyCells = self.getNearbyCells(cell)
 
-
+        for cell in nearbyCells:
+            pass
 
         print("\n-------------------")
-        print("cell length = ", len(sentence.cells))
-        print("cells = ", sentence.cells)
-        print("count = ", count)
+        print("Inputted cell M-AK = ", cell)
+        print("Cell length = ", len(sentence.cells))
+        print("Cells = ", sentence.cells)
+        print("Sentence created = ", sentence.__str__())
+        print("Count = ", count)
+        print("All nearby Cells = ", nearbyCells)
         print("-------------------")
+
+    # Function modified from the nearby_mines method of class Minesweeper
+    def getNearbyCells(self, inputted_cell):
+        # Keep count of nearby cells
+        print("Inputted cell M-nearby = ", inputted_cell)
+        cells = set()
+
+        # Loop over all cells within one row and column
+        for i in range(inputted_cell[0] - 1, inputted_cell[0] + 2):
+            for j in range(inputted_cell[1] - 1, inputted_cell[1] + 2):
+                # Ignore the cell itself
+                if (i, j) == inputted_cell:
+                    continue
+
+                # limit the search range of nearby cell to those that could be reached
+                if 0 <= i < self.height and 0 <= j < self.width:
+                    # add the nearby cell to the list
+                    nearbyCell = (i, j)
+                    print("Nearby cell find = ", nearbyCell)
+                    cells.add(nearbyCell)
+
+        return cells
 
     def make_safe_move(self):
         """
