@@ -182,10 +182,10 @@ class MinesweeperAI():
         safe cell, how many neighboring cells have mines in them.
 
         This function should:
-            1) mark the cell as a move that has been made : Done
-            2) mark the cell as safe                      : Done
+            1) mark the cell as a move that has been made
+            2) mark the cell as safe
             3) add a new sentence to the AI's knowledge base
-               based on the value of `cell` and `count`             format: cell - {0,1}, count - 1
+               based on the value of `cell` and `count`
             4) mark any additional cells as safe or as mines
                if it can be concluded based on the AI's knowledge base
             5) add any new sentences to the AI's knowledge base
@@ -194,25 +194,25 @@ class MinesweeperAI():
         self.moves_made.add(cell)         # Mark the cell as a made move
         self.mark_safe(cell)              # Mark the cell as safe
 
-        sentence = Sentence(cell, count)  # Create a new sentence, for debugging only
-        nearbyCells = self.getNearbyCells(cell)
+        nearbyCells = self.getNearbyCells(cell)     # Get all nearby cell relative to the given cell
+        sentence = Sentence(nearbyCells, count)     # Construct a new sentence based on the nearby cells and count
 
-        for cell in nearbyCells:
-            pass
+        # no mine nearby, mark them as safe and append to knowledge
+        if count == 0:
+            for cell in nearbyCells:
+                self.mark_safe(cell)
 
-        print("\n-------------------")
-        print("Inputted cell M-AK = ", cell)
-        print("Cell length = ", len(sentence.cells))
-        print("Cells = ", sentence.cells)
-        print("Sentence created = ", sentence.__str__())
-        print("Count = ", count)
-        print("All nearby Cells = ", nearbyCells)
-        print("-------------------")
+            self.knowledge.append(sentence)
+
+        # one/more mines nearby, mark them as mine and append to knowledge
+        elif count == len(nearbyCells) and count > 0:
+            for cell in nearbyCells:
+                self.mark_mine(cell)
+
+            self.knowledge.append(sentence)
 
     # Function modified from the nearby_mines method of class Minesweeper
     def getNearbyCells(self, inputted_cell):
-        # Keep count of nearby cells
-        print("Inputted cell M-nearby = ", inputted_cell)
         cells = set()
 
         # Loop over all cells within one row and column
@@ -226,8 +226,12 @@ class MinesweeperAI():
                 if 0 <= i < self.height and 0 <= j < self.width:
                     # add the nearby cell to the list
                     nearbyCell = (i, j)
-                    print("Nearby cell find = ", nearbyCell)
                     cells.add(nearbyCell)
+
+        # remove the cells that are already known to be safe or mine
+        for cell in cells.copy():
+            if cell in self.mines or cell in self.safes:
+                cells.remove(cell)
 
         return cells
 
