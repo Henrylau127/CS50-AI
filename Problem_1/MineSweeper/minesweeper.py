@@ -191,25 +191,34 @@ class MinesweeperAI():
             5) add any new sentences to the AI's knowledge base
                if they can be inferred from existing knowledge
         """
-        self.moves_made.add(cell)         # Mark the cell as a made move
-        self.mark_safe(cell)              # Mark the cell as safe
+        self.moves_made.add(cell)
+        self.mark_safe(cell)
 
-        nearbyCells = self.getNearbyCells(cell)     # Get all nearby cell relative to the given cell
-        sentence = Sentence(nearbyCells, count)     # Construct a new sentence based on the nearby cells and count
+        nearbyCells = self.getNearbyCells(cell)
+        sentence = Sentence(nearbyCells, count)
 
         # no mine nearby, mark them as safe and append to knowledge
         if count == 0:
             for cell in nearbyCells:
                 self.mark_safe(cell)
-
             self.knowledge.append(sentence)
 
         # one/more mines nearby, mark them as mine and append to knowledge
         elif count == len(nearbyCells) and count > 0:
             for cell in nearbyCells:
                 self.mark_mine(cell)
-
             self.knowledge.append(sentence)
+
+        # loop through all sentences and find is there any additional cells that could be marked as safe/mine
+        for sentence in self.knowledge:
+            # Cell is not mine
+            if sentence.count == 0:
+                for sentenceCell in sentence.cells.copy():
+                    self.mark_safe(sentenceCell)
+            # Cell contains mine
+            elif sentence.count == len(sentence.cells) and sentence.count > 0:
+                for sentenceCell in sentence.cells.copy():
+                    self.mark_mine(sentenceCell)
 
     # Function modified from the nearby_mines method of class Minesweeper
     def getNearbyCells(self, inputted_cell):
