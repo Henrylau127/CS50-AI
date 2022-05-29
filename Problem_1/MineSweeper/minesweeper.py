@@ -200,21 +200,18 @@ class MinesweeperAI():
 
         nearbyCells = self.getNearbyCells(cell)
         sentence = Sentence(nearbyCells, count)
+        self.knowledge.append(sentence)
         checkFlag = True
 
         # no mine nearby, mark them as safe
-        if count == 0:
+        if sentence.count == 0:
             for cell in nearbyCells:
                 self.mark_safe(cell)
 
         # one/more mines nearby, mark them as mine
-        elif count == len(nearbyCells) and count > 0:
+        elif sentence.count == len(nearbyCells) and sentence.count > 0:
             for cell in nearbyCells:
                 self.mark_mine(cell)
-
-        # append the sentence to knowledge is it isn't already known and contains 1 or more cells
-        if sentence not in self.knowledge and len(nearbyCells) > 0:
-            self.knowledge.append(sentence)
 
         # loop through all sentences and find is there any additional cells that could be marked as safe/mine
         while checkFlag:
@@ -247,10 +244,6 @@ class MinesweeperAI():
 
                 if newSentenceCell and newSentence not in self.knowledge:
                     self.knowledge.append(newSentence)
-
-        print("Number of Sentences in knowledge base: {}".format(len(self.knowledge)))
-        for sentence in self.knowledge:
-            print("{} = {}".format(sentence.cells, sentence.count))
 
     # Function modified from the nearby_mines method of class Minesweeper
     def getNearbyCells(self, inputted_cell):
