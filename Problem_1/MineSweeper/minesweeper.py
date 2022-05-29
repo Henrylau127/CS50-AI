@@ -109,6 +109,8 @@ class Sentence():
         if len(self.cells) == self.count and self.count > 0:
             return self.cells
 
+        return set()
+
     def known_safes(self):
         """
         Returns the set of all cells in self.cells known to be safe.
@@ -116,6 +118,8 @@ class Sentence():
         # no mine nearby
         if self.count == 0:
             return self.cells
+
+        return set()
 
     def mark_mine(self, cell):
         """
@@ -196,29 +200,44 @@ class MinesweeperAI():
 
         nearbyCells = self.getNearbyCells(cell)
         sentence = Sentence(nearbyCells, count)
+        checkFlag = True
 
-        # no mine nearby, mark them as safe and append to knowledge
+        # no mine nearby, mark them as safe
         if count == 0:
             for cell in nearbyCells:
                 self.mark_safe(cell)
-            self.knowledge.append(sentence)
 
-        # one/more mines nearby, mark them as mine and append to knowledge
+        # one/more mines nearby, mark them as mine
         elif count == len(nearbyCells) and count > 0:
             for cell in nearbyCells:
                 self.mark_mine(cell)
+
+        # append the sentence to knowledge is it isn't already known and contains 1 or more cells
+        if sentence not in self.knowledge and len(nearbyCells) > 0:
             self.knowledge.append(sentence)
 
         # loop through all sentences and find is there any additional cells that could be marked as safe/mine
-        for sentence in self.knowledge:
-            # Cell is not mine
-            if sentence.count == 0:
-                for sentenceCell in sentence.cells.copy():
-                    self.mark_safe(sentenceCell)
-            # Cell contains mine
-            elif sentence.count == len(sentence.cells) and sentence.count > 0:
-                for sentenceCell in sentence.cells.copy():
-                    self.mark_mine(sentenceCell)
+        while checkFlag:
+            checkFlag = False
+
+            for sentence in self.knowledge:
+                knownSafes = sentence.known_safes()
+                knownMines = sentence.known_mines()
+
+                # remove all empty knowledge as those serve no purpose other than wasting memory
+                if len(sentence.cells) == 0:
+                    self.knowledge.remove(sentence)
+                    continue
+
+                # mark all cells that's known to be safe
+                for cell in knownSafes.copy():
+                    self.mark_safe(cell)
+                    checkFlag = True
+
+                # mark all cells that's known to be mine
+                for cell in knownMines.copy():
+                    self.mark_mine(cell)
+                    checkFlag = True
 
     # Function modified from the nearby_mines method of class Minesweeper
     def getNearbyCells(self, inputted_cell):
