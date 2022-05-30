@@ -106,7 +106,7 @@ class Sentence():
         Returns the set of all cells in self.cells known to be mines.
         """
         # one/more mines nearby
-        if len(self.cells) == self.count and self.count > 0:
+        if len(self.cells) == self.count:
             return self.cells
         else:
             return set()
@@ -229,39 +229,20 @@ class MinesweeperAI():
                 if len(sentence.cells) == 0:
                     self.knowledge.remove(sentence)
 
-        print("All Sentence:")
-        for idx, sentence in enumerate(self.knowledge):
-            print(f"Sentence {idx}: {sentence}")
-        print("\n")
+                # iterate all knowledge and check is there any cell that could be inferred from existing knowledge
+                for s1 in self.knowledge:
+                    for s2 in self.knowledge:
+                        # create a new sentence if s1 is s2's subset,
+                        # I.E: one/more cells appears in both sentence at the same time
+                        if s1.cells.issubset(s2.cells) and s1 != s2:
+                            newSentenceCell = s2.cells - s1.cells
+                            newSentenceCount = s2.count - s1.count
+                            newSentence = Sentence(newSentenceCell, newSentenceCount)
 
-        # iterate all knowledge and check is there any cell that could be inferred from existing knowledge
-        for s1 in self.knowledge:
-            for s2 in self.knowledge:
-                # create a new sentence if s1 is s2's subset,
-                # I.E: one/more cells appears in both sentence at the same time
-                if s1.cells.issubset(s2.cells) and s1 != s2:
-                    newSentenceCell = s2.cells - s1.cells
-                    newSentenceCount = s2.count - s1.count
-                    newSentence = Sentence(newSentenceCell, newSentenceCount)
-
-                    # append the new sentence to the knowledge if isn't empty and not already in knowledge
-                    if newSentenceCell and newSentence not in self.knowledge:
-                        print(f"Sentence 1: {s1}, count {s1.count}")
-                        print(f"Sentence 2: {s2}, count {s2.count}")
-                        print(f"Appending {newSentence.__str__()} to Knowledge \n")
-                        self.knowledge.append(newSentence)
-                        nsKnownSafes = newSentence.known_safes()
-                        nsKnownMines = newSentence.known_mines()
-
-                        # mark all cells that's known to be safe
-                        for cell in nsKnownSafes.copy():
-                            print(f"Marking {cell} as undiscovered safe cell")
-                            self.mark_safe(cell)
-
-                        # mark all cells that's known to be mine
-                        for cell in nsKnownMines.copy():
-                            print(f"Marking {cell} as undiscovered mine")
-                            self.mark_mine(cell)
+                            # append the new sentence to the knowledge if isn't empty and not already in knowledge
+                            if newSentenceCell and newSentence not in self.knowledge:
+                                self.knowledge.append(newSentence)
+                                checkFlag = True
 
     # Function modified from the nearby_mines method of class Minesweeper
     def getNearbyCells(self, inputted_cell):
