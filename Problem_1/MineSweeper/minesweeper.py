@@ -108,8 +108,8 @@ class Sentence():
         # one/more mines nearby
         if len(self.cells) == self.count and self.count > 0:
             return self.cells
-
-        return set()
+        else:
+            return set()
 
     def known_safes(self):
         """
@@ -118,8 +118,8 @@ class Sentence():
         # no mine nearby
         if self.count == 0:
             return self.cells
-
-        return set()
+        else:
+            return set()
 
     def mark_mine(self, cell):
         """
@@ -195,14 +195,17 @@ class MinesweeperAI():
             5) add any new sentences to the AI's knowledge base
                if they can be inferred from existing knowledge
         """
+        checkFlag = True
+
         self.moves_made.add(cell)
         self.mark_safe(cell)
 
         nearbyCells = self.getNearbyCells(cell)
         sentence = Sentence(nearbyCells, count)
-        self.knowledge.append(sentence)
 
-        checkFlag = True
+        # append the sentence if it isn't empty and not already in knowledge
+        if sentence.cells and sentence not in self.knowledge:
+            self.knowledge.append(sentence)
 
         # loop through all sentences and find is there any additional cells that could be marked as safe/mine
         while checkFlag:
@@ -227,8 +230,8 @@ class MinesweeperAI():
                     self.knowledge.remove(sentence)
 
         print("All Sentence:")
-        for sentence in self.knowledge:
-            print(f"Sentence: {sentence}")
+        for idx, sentence in enumerate(self.knowledge):
+            print(f"Sentence {idx}: {sentence}")
         print("\n")
 
         # iterate all knowledge and check is there any cell that could be inferred from existing knowledge
@@ -236,7 +239,7 @@ class MinesweeperAI():
             for s2 in self.knowledge:
                 # create a new sentence if s1 is s2's subset,
                 # I.E: one/more cells appears in both sentence at the same time
-                if s1.cells.issubset(s2.cells):
+                if s1.cells.issubset(s2.cells) and s1 != s2:
                     newSentenceCell = s2.cells - s1.cells
                     newSentenceCount = s2.count - s1.count
                     newSentence = Sentence(newSentenceCell, newSentenceCount)
@@ -247,15 +250,17 @@ class MinesweeperAI():
                         print(f"Sentence 2: {s2}, count {s2.count}")
                         print(f"Appending {newSentence.__str__()} to Knowledge \n")
                         self.knowledge.append(newSentence)
-                        safes = newSentence.known_safes()
-                        mines = newSentence.known_mines()
+                        nsKnownSafes = newSentence.known_safes()
+                        nsKnownMines = newSentence.known_mines()
 
                         # mark all cells that's known to be safe
-                        for cell in safes.copy():
+                        for cell in nsKnownSafes.copy():
+                            print(f"Marking {cell} as undiscovered safe cell")
                             self.mark_safe(cell)
 
                         # mark all cells that's known to be mine
-                        for cell in mines.copy():
+                        for cell in nsKnownMines.copy():
+                            print(f"Marking {cell} as undiscovered mine")
                             self.mark_mine(cell)
 
     # Function modified from the nearby_mines method of class Minesweeper
@@ -274,11 +279,6 @@ class MinesweeperAI():
                     # add the nearby cell to the list
                     nearbyCell = (i, j)
                     cells.add(nearbyCell)
-
-        # remove the cells that are already known to be safe or mine
-        # for cell in cells.copy():
-        #     if cell in self.mines or cell in self.safes:
-        #         cells.remove(cell)
 
         return cells
 
