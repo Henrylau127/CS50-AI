@@ -201,17 +201,8 @@ class MinesweeperAI():
         nearbyCells = self.getNearbyCells(cell)
         sentence = Sentence(nearbyCells, count)
         self.knowledge.append(sentence)
+
         checkFlag = True
-
-        # no mine nearby, mark them as safe
-        if sentence.count == 0:
-            for cell in nearbyCells:
-                self.mark_safe(cell)
-
-        # one/more mines nearby, mark them as mine
-        elif sentence.count == len(nearbyCells) and sentence.count > 0:
-            for cell in nearbyCells:
-                self.mark_mine(cell)
 
         # loop through all sentences and find is there any additional cells that could be marked as safe/mine
         while checkFlag:
@@ -235,8 +226,15 @@ class MinesweeperAI():
                 if len(sentence.cells) == 0:
                     self.knowledge.remove(sentence)
 
+        print("All Sentence:")
+        for sentence in self.knowledge:
+            print(f"Sentence: {sentence}")
+        print("\n")
+
         # iterate all knowledge and check is there any cell that could be inferred from existing knowledge
         for (s1, s2) in itertools.permutations(self.knowledge, 2):
+            # print(f"Sentence 1: {s1}")
+            # print(f"Sentence 2: {s2}")
             if s1.cells.issubset(s2.cells):
                 newSentenceCell = s2.cells - s1.cells
                 newSentenceCount = s2.count - s1.count
@@ -244,6 +242,16 @@ class MinesweeperAI():
 
                 if newSentenceCell and newSentence not in self.knowledge:
                     self.knowledge.append(newSentence)
+                    safes = newSentence.known_safes()
+                    mines = newSentence.known_mines()
+
+                    # mark all cells that's known to be safe
+                    for cell in safes.copy():
+                        self.mark_safe(cell)
+
+                    # mark all cells that's known to be mine
+                    for cell in mines.copy():
+                        self.mark_mine(cell)
 
     # Function modified from the nearby_mines method of class Minesweeper
     def getNearbyCells(self, inputted_cell):
@@ -263,9 +271,9 @@ class MinesweeperAI():
                     cells.add(nearbyCell)
 
         # remove the cells that are already known to be safe or mine
-        for cell in cells.copy():
-            if cell in self.mines or cell in self.safes:
-                cells.remove(cell)
+        # for cell in cells.copy():
+        #     if cell in self.mines or cell in self.safes:
+        #         cells.remove(cell)
 
         return cells
 
