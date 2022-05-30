@@ -232,26 +232,31 @@ class MinesweeperAI():
         print("\n")
 
         # iterate all knowledge and check is there any cell that could be inferred from existing knowledge
-        for (s1, s2) in itertools.permutations(self.knowledge, 2):
-            # print(f"Sentence 1: {s1}")
-            # print(f"Sentence 2: {s2}")
-            if s1.cells.issubset(s2.cells):
-                newSentenceCell = s2.cells - s1.cells
-                newSentenceCount = s2.count - s1.count
-                newSentence = Sentence(newSentenceCell, newSentenceCount)
+        for s1 in self.knowledge:
+            for s2 in self.knowledge:
+                # create a new sentence if s1 is s2's subset,
+                # I.E: one/more cells appears in both sentence at the same time
+                if s1.cells.issubset(s2.cells):
+                    newSentenceCell = s2.cells - s1.cells
+                    newSentenceCount = s2.count - s1.count
+                    newSentence = Sentence(newSentenceCell, newSentenceCount)
 
-                if newSentenceCell and newSentence not in self.knowledge:
-                    self.knowledge.append(newSentence)
-                    safes = newSentence.known_safes()
-                    mines = newSentence.known_mines()
+                    # append the new sentence to the knowledge if isn't empty and not already in knowledge
+                    if newSentenceCell and newSentence not in self.knowledge:
+                        print(f"Sentence 1: {s1}, count {s1.count}")
+                        print(f"Sentence 2: {s2}, count {s2.count}")
+                        print(f"Appending {newSentence.__str__()} to Knowledge \n")
+                        self.knowledge.append(newSentence)
+                        safes = newSentence.known_safes()
+                        mines = newSentence.known_mines()
 
-                    # mark all cells that's known to be safe
-                    for cell in safes.copy():
-                        self.mark_safe(cell)
+                        # mark all cells that's known to be safe
+                        for cell in safes.copy():
+                            self.mark_safe(cell)
 
-                    # mark all cells that's known to be mine
-                    for cell in mines.copy():
-                        self.mark_mine(cell)
+                        # mark all cells that's known to be mine
+                        for cell in mines.copy():
+                            self.mark_mine(cell)
 
     # Function modified from the nearby_mines method of class Minesweeper
     def getNearbyCells(self, inputted_cell):
