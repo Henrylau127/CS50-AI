@@ -69,7 +69,11 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    # sample = dict()
+
+    # for sampleNumber in range(0, n):
+
+    raise Exception("WTF")
 
 
 def iterate_pagerank(corpus, damping_factor):

@@ -289,7 +289,9 @@ class MinesweeperAI():
             2) are not known to be mines
         """
         # Generate a random move
-        randomMove = (random.randint(0, self.height - 1), random.randint(0, self.width - 1))
+        maxHeight = self.height - 1
+        maxWidth = self.width - 1
+        randomMove = (random.randint(0, maxHeight), random.randint(0, maxWidth))
 
         if randomMove in self.moves_made or randomMove in self.mines:
             # Regenerate the move if it's already been chosen or known to be mines
