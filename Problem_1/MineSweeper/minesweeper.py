@@ -204,8 +204,7 @@ class MinesweeperAI():
         sentence = Sentence(nearbyCells, count)
 
         # append the sentence if it isn't empty and not already in knowledge
-        if sentence.cells and sentence not in self.knowledge:
-            self.knowledge.append(sentence)
+        self.knowledge.append(sentence)
 
         # loop through all sentences and find is there any additional cells that could be marked as safe/mine
         while checkFlag:
@@ -214,6 +213,7 @@ class MinesweeperAI():
             # iterate all knowledge and check is there any cell that could be inferred from existing knowledge
             for s1 in self.knowledge:
                 for s2 in self.knowledge:
+                    checkFlag = False
                     # create a new sentence if s1 is s2's subset,
                     # I.E: one/more cells appears in both sentence at the same time
                     if s1.cells.issubset(s2.cells) and s1 != s2:
@@ -227,6 +227,7 @@ class MinesweeperAI():
                             checkFlag = True
 
             for sentence in self.knowledge:
+                checkFlag = False
                 knownSafes = sentence.known_safes()
                 knownMines = sentence.known_mines()
 
@@ -274,7 +275,7 @@ class MinesweeperAI():
         """
         # Loop through all known safe moves
         for move in self.safes:
-            # return the move if it isn't been take before and isn't known to be mine
+            # return the move if it hasn't been take before and isn't known to be mine
             if move not in self.moves_made and move not in self.mines:
                 return move
 
