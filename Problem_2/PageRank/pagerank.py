@@ -2,6 +2,7 @@ import os
 import random
 import re
 import sys
+from pprint import pprint
 
 DAMPING = 0.85
 SAMPLES = 10000
@@ -57,7 +58,27 @@ def transition_model(corpus, page, damping_factor):
     linked to by `page`. With probability `1 - damping_factor`, choose
     a link at random chosen from all pages in the corpus.
     """
-    raise NotImplementedError
+    propDist = dict()
+    linkedPageNum = len(corpus[page])
+    totalPageNum = len(corpus)
+
+    if linkedPageNum > 0:
+        # set the probability of the user randomly choose among all the pages
+        randomProp = (1 - damping_factor)/totalPageNum
+
+        for linkedPage in corpus:
+            if page != linkedPage:
+                # set the probability of the user randomly choose that link
+                propDist[linkedPage] = (damping_factor/linkedPageNum) + randomProp
+            else:
+                # set the random probability to the page itself
+                propDist[linkedPage] = randomProp
+    else:
+        # The page had no outgoing links, treat each link equally
+        for page in corpus:
+            propDist[page] = 1 / totalPageNum
+
+    return propDist
 
 
 def sample_pagerank(corpus, damping_factor, n):
@@ -69,11 +90,11 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    # sample = dict()
+    sample = dict()
 
     # for sampleNumber in range(0, n):
 
-    raise Exception("WTF")
+    return sample
 
 
 def iterate_pagerank(corpus, damping_factor):
@@ -85,7 +106,14 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    prValue = dict()
+    totalPageNum = len(corpus)
+
+    # Assign an initial rank of 1/total number of page to each page
+    for page in corpus:
+        prValue[page] = 1 / totalPageNum
+
+    return prValue
 
 
 if __name__ == "__main__":
