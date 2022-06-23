@@ -2,7 +2,6 @@ import os
 import random
 import re
 import sys
-from pprint import pprint
 
 DAMPING = 0.85
 SAMPLES = 10000
@@ -61,15 +60,14 @@ def transition_model(corpus, page, damping_factor):
     propDist = dict()
     linkedPageNum = len(corpus[page])
     totalPageNum = len(corpus)
+    randomProp = (1 - damping_factor) / totalPageNum
 
-    if linkedPageNum > 0:
-        # set the probability of the user randomly choose among all the pages
-        randomProp = (1 - damping_factor)/totalPageNum
-
+    if linkedPageNum != 0:
+        # The page have outgoing links, set the probability of each page
         for linkedPage in corpus:
-            if page != linkedPage:
+            if linkedPage in corpus[page]:
                 # set the probability of the user randomly choose that link
-                propDist[linkedPage] = (damping_factor/linkedPageNum) + randomProp
+                propDist[linkedPage] = (damping_factor / linkedPageNum) + randomProp
             else:
                 # set the random probability to the page itself
                 propDist[linkedPage] = randomProp
@@ -90,9 +88,39 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
+    randomChoiceStr = ""
     sample = dict()
 
-    # for sampleNumber in range(0, n):
+    # initialize a page list for the random picker to choose from
+    for page in corpus:
+        sample[page] = 0
+
+    # start sampling the probability
+    for sampleNumber in range(n):
+        # first sample, choose randomly
+        if sampleNumber == 0:
+            randomChoiceStr = random.choices(list(corpus.keys()), k=1)[0]
+
+        # choose according to the current sampled probability
+        else:
+            # get the probability distribution of the previous sample
+            propDist = transition_model(corpus, randomChoiceStr, damping_factor)
+
+            # convert the probability distribution to list for the random pick to reference from
+            propDistList = list(propDist.values())
+
+            # randomly pick a page based on the probability distribution
+            randomChoice = random.choices(tuple(sample), propDistList)
+
+            # convert the choice to string for dictionary manipulation
+            randomChoiceStr = " ".join(randomChoice)
+
+            # increment the visit counter of the picked page
+            sample[randomChoiceStr] = sample.get(str(randomChoiceStr), 0) + 1
+
+    # normalize to the value of the sample to 1
+    for results in sample:
+        sample[results] = sample.get(results) / n
 
     return sample
 
