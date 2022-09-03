@@ -99,7 +99,7 @@ def sample_pagerank(corpus, damping_factor, n):
     for sampleNumber in range(n):
         # first sample, choose randomly
         if sampleNumber == 0:
-            randomChoiceStr = random.choices(list(corpus.keys()), k=1)[0]
+            randomChoiceStr = random.choice(list(corpus.keys()))
 
         # choose according to the current sampled probability
         else:
@@ -134,12 +134,38 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    prValue = dict()
+    prValue = updatedPrValue = dict()
     totalPageNum = len(corpus)
+    iterFlag = True
 
     # Assign an initial rank of 1/total number of page to each page
     for page in corpus:
         prValue[page] = 1 / totalPageNum
+
+    # Iterate until the PageRank value of each page converges
+    while iterFlag:
+        iterFlag = False
+
+        # Assign the updated PageRank values to the current PageRank value
+        prValue = updatedPrValue.copy()
+
+        # Iterate through each page
+        for page in corpus:
+            # Calculate the PageRank value of the page
+            updatedPrValue[page] = (1 - damping_factor) / totalPageNum
+
+            for linkedPage in corpus:
+                # Check if the page is linked to the current page
+                if page in corpus[linkedPage]:
+                    # Calculate the PageRank value of the page
+                    updatedPrValue[page] += damping_factor * prValue[linkedPage] / len(corpus[linkedPage])
+
+        # Check if the PageRank value of each page has converged
+        for page in corpus:
+            # Continue the iteration if the PageRank value of any page has not converged yet
+            if abs(prValue[page] - updatedPrValue[page]) > 0.001:
+                iterFlag = True
+                break
 
     return prValue
 

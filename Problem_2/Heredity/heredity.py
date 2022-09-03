@@ -157,7 +157,15 @@ def normalize(probabilities):
     Update `probabilities` such that each probability distribution
     is normalized (i.e., sums to 1, with relative proportions the same).
     """
-    raise NotImplementedError
+    # Sum all probabilities, then divide the result by 1 to get the ratio
+    ratio = 1 / sum(probabilities.values())
+    result = dict()
+    
+    # multiply all given probabilities with the ratio to get it's normalized form
+    for prop in probabilities:
+        result[prop] = probabilities.get(prop) * ratio
+
+    return result
 
 
 if __name__ == "__main__":
