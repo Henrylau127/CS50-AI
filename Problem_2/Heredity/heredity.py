@@ -137,29 +137,39 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone in set `have_trait` has the trait, and
         * everyone not in set` have_trait` does not have the trait.
     """
-    prob = 0
+    prob = 1
 
     # Iterate over all person
     for ppl in people:
-        # print(f'person {ppl}: {people[ppl]}')
-
         # set the gene and trait type based on the condition of the person
         geneType = 1 if ppl in one_gene else 2 if ppl in two_genes else 0
-        traitType = True if ppl in have_trait else False
+        traitType = ppl in have_trait
 
         # set the probability based on the type of the person
         geneProb = PROBS["gene"][geneType]
         traitProb = PROBS["trait"][geneType][traitType]
 
-        # # the person gets his gene from his mother
-        # if people[ppl]['mother'] is not None:
-        #     pass
-        #
-        # # the person gets his gene from his father
-        # if people[ppl]['father'] is not None:
-        #     pass
+        # if the person has no parents, then the probability is the gene probability
+        if people[ppl]['mother'] is None:
+            prob *= geneProb * traitProb
+        else:
+            # get the parents
+            mother = people[ppl]['mother']
+            father = people[ppl]['father']
 
-        prob = geneProb * traitProb
+            # get the gene type of the parents
+            motherGeneProbs = PROBS["gene"][1 if mother in one_gene else 2 if mother in two_genes else 0]
+            fatherGeneProbs = PROBS["gene"][1 if father in one_gene else 2 if father in two_genes else 0]
+
+            # if the person has 2 genes, then the probability is the probability of the parents having 2 genes
+            if geneType == 2:
+                pass
+            # if the person has 1 gene, then the probability is the probability of the parents having 1 gene
+            elif geneType == 1:
+                pass
+            # if the person has 0 genes, then the probability is the probability of the parents having 0 genes
+            else:
+                pass
 
     return prob
 
@@ -179,10 +189,7 @@ def update(probabilities, one_gene, two_genes, have_trait, p):
         else:
             probabilities[ppl]['gene'][0] += p
 
-        if ppl in have_trait:
-            probabilities[ppl]['trait'][True] += p
-        else:
-            probabilities[ppl]['trait'][False] += p
+        probabilities[ppl]['trait'][ppl in have_trait] += p
 
 
 def normalize(probabilities):
@@ -192,11 +199,9 @@ def normalize(probabilities):
     """
     for ppl in probabilities:
         for probType in probabilities[ppl]:
+            total = sum(probabilities[ppl][probType].values())
             for typeNum in probabilities[ppl][probType]:
-                currentProbVal = probabilities[ppl][probType][typeNum]
-                factor = 1 / sum(probabilities[ppl][probType].values())
-
-                probabilities[ppl][probType][typeNum] = factor * currentProbVal
+                probabilities[ppl][probType][typeNum] /= total
 
 
 if __name__ == "__main__":
