@@ -9,7 +9,8 @@ from sklearn.model_selection import train_test_split
 EPOCHS = 10
 IMG_WIDTH = 30
 IMG_HEIGHT = 30
-NUM_CATEGORIES = 43
+NUM_CATEGORIES = 43 # For big dataset
+# NUM_CATEGORIES = 3    # For small dataset
 TEST_SIZE = 0.4
 
 
@@ -58,9 +59,18 @@ def load_data(data_dir):
     be a list of integer labels, representing the categories for each of the
     corresponding `images`.
     """
+    images = []
+    labels = []
 
+    for i in range(0, NUM_CATEGORIES):
+        path = os.path.join(data_dir, str(i))
+        for img in os.listdir(path):
+            img_array = cv2.imread(os.path.join(path, img))
+            img_array = cv2.resize(img_array, (IMG_WIDTH, IMG_HEIGHT))
+            images.append(img_array)
+            labels.append(i)
 
-    raise NotImplementedError
+    return images, labels
 
 
 def get_model():
@@ -69,7 +79,40 @@ def get_model():
     `input_shape` of the first layer is `(IMG_WIDTH, IMG_HEIGHT, 3)`.
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
-    raise NotImplementedError
+    # Create the CNN model
+    model = tf.keras.models.Sequential([
+        # Convolutional Layer with 32 filters
+        tf.keras.layers.Conv2D(
+            32, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+        ),
+
+        tf.keras.layers.Conv2D(
+            32, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+        ),
+
+        # Max pooling layer with 2x2 pool size
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+
+        # Flatten units
+        tf.keras.layers.Flatten(),
+
+        # 128 Hidden layers with dropout
+        tf.keras.layers.Dense(128, activation="relu"),
+        tf.keras.layers.Dropout(0.5),
+
+        # output layer with 3 category (small set) or 32 category (big set)
+        tf.keras.layers.Dense(NUM_CATEGORIES, activation='softmax')
+    ])
+
+    # Train the CNN
+    model.compile(
+        optimizer="adam",
+        loss="categorical_crossentropy",
+        metrics=["accuracy"]
+    )
+
+    return model
 
 
 if __name__ == "__main__":
